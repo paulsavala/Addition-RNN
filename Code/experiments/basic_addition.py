@@ -39,6 +39,7 @@ if __name__ == '__main__':
     input_train_target, output_train_target =  format_targets(y_train)
     model.fit([X_train, input_train_target], output_train_target, epochs=Config.epochs, validation_split=Config.validation_split)
 
+    # Evaluate on the test set
     input_test_target, output_test_target = format_targets(y_test)
     test_metrics = model.evaluate([X_test, input_test_target], output_test_target, verbose=0)
     pprint_metrics(test_metrics, model.metrics_names)
