@@ -9,4 +9,4 @@ Jan 30, 2020 - At this point I have a working seq2seq models which takes in two 
 - Refactor code into PyCharm so I can use imports and reuse code
 - See what results are achieved in [here](https://arxiv.org/abs/1904.01557.pdf) and duplicate them
 - Read paper ["What neural networks can reason about"](https://arxiv.org/pdf/1905.13211.pdf) to train and gain a theoretical understanding of the situation
-- Start researching how to visualize/understand what LSTMs are learning
+- Start learning about LSTM variants (attention, etc.)
