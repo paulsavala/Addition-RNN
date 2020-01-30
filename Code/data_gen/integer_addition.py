@@ -9,16 +9,17 @@ def _generate_sample(n_terms, n_digits, int_encoder=None, reverse=False):
     # convert '3' to 3 or '+' to 12)
     x = []
     for _ in range(n_terms):
-        x.append(np.random.randint(10 ** n_digits))
+        x.append(np.random.randint(10 ** n_digits - 1))
 
     y = np.sum(x)
 
     x_str = '+'.join(str(n) for n in x)
     y_str = str(y)
 
-    # Pad x so that is always has the same length. It should be of length digit_length for each digit,
-    # plus num_terms - 1 "plus" signs
-    x_str = x_str.rjust(input_seq_length(n_terms, n_digits))
+    # Pad x so that is always has the same length. We subtract one because we don't yet account for the \n character
+    max_input_digits = input_seq_length(n_terms, n_digits) - 1
+    x_str = x_str.rjust(max_input_digits)
+
     max_target_digits = target_seq_length(n_terms, n_digits)
     y_str = y_str.rjust(max_target_digits)
 

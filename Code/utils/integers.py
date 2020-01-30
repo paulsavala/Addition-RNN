@@ -26,20 +26,23 @@ def one_hot_matrix(M, max_value):
 
 def char_to_int_map(max_value=9, min_value=0):
     char_to_int = {str(n): n for n in range(min_value, max_value+1)}
-    char_to_int[' '] = len(char_to_int) + 1
-    char_to_int['+'] = len(char_to_int) + 1
-    char_to_int['\n'] = len(char_to_int) + 1
+    n_terms = max_value - min_value + 1
+    char_to_int[' '] = n_terms
+    char_to_int['+'] = n_terms + 1
+    char_to_int['\n'] = n_terms + 2
     return char_to_int
 
 
 def input_seq_length(n_terms, n_digits):
     # Given an addition sequence with n_terms terms each with n_digits, return how many characters the (non-padded)
     # resulting input string can be (maximum possible length)
-    # n_digits for each term, and n_terms - 1 "plus signs"
-    return n_terms * n_digits + n_terms - 1
+    # n_digits for each term, and n_terms - 1 "plus signs", along with an end-of-string character \n
+    return n_terms * n_digits + n_terms - 1 + 1
 
 
 def target_seq_length(n_terms, n_digits):
     # Given an addition sequence with n_terms terms each with n_digits, return how many characters the (non-padded)
     # resulting output string can be (maximum possible length)
+    # We _don't_ add one at the end for the end-of-string character \n because we always either chop off the last digit
+    # (decoder input) or chop off the first digit (decoder output)
     return n_digits + 1 + int(np.floor(np.log10(n_terms)))
