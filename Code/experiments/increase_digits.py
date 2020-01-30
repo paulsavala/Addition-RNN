@@ -5,10 +5,10 @@ from utils.training import format_targets
 from utils.prediction import pprint_metrics
 from data_gen.integer_addition import generate_samples
 
-import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
 
-import os
+from pathlib import Path
+from datetime import datetime
 
 
 class Config:
@@ -81,13 +81,22 @@ if __name__ == '__main__':
             model = model_class.model()
 
             # Create a callback that saves the model's weights
-            checkpoint_path = f"experiments/increase_digits/logs/cp_{d}_rev_{reverse}.ckpt"
-            checkpoint_dir = os.path.dirname(checkpoint_path)
+            log_dir = Path(f'experiments/increase_digits/logs/{d}_rev_{reverse}')
+            log_dir.mkdir(parents=True, exist_ok=True)
 
-            cp_callback = ModelCheckpoint(filepath=checkpoint_path,
+            current_dt_str = datetime.now().strftime("%B %d, %Y - %H:%M:%S")
+
+            checkpoint_dir = log_dir / Path('checkpoints')
+            checkpoint_dir.mkdir(parents=True, exist_ok=True)
+            checkpoint_path = checkpoint_dir / Path(f'{current_dt_str}.ckpt')
+            cp_callback = ModelCheckpoint(filepath=checkpoint_path.as_posix(),
                                           save_weights_only=True,
                                           verbose=1)
-            csv_logger = CSVLogger(f'experiments/logs/{d}_rev_{reverse}.csv', append=True, separator=';')
+
+            metrics_dir = log_dir / Path('metrics')
+            metrics_dir.mkdir(parents=True, exist_ok=True)
+            metrics_path = metrics_dir / Path(f'{current_dt_str}.csv')
+            metrics_logger = CSVLogger(metrics_path.as_posix(), append=True, separator=';')
 
             # Begin training
             print(f'Experiment: {d} digits with reverse = {reverse}')
@@ -107,7 +116,7 @@ if __name__ == '__main__':
             model.fit([X_train, input_train_target],
                       output_train_target,
                       epochs=Config.epochs,
-                      callbacks=[cp_callback, csv_logger])
+                      callbacks=[cp_callback, metrics_logger])
 
             # Evaluate on the test set
             input_test_target, output_test_target = format_targets(y_test)
