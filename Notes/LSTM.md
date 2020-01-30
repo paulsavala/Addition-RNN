@@ -1,6 +1,6 @@
 # General LSTM Notes
 The purpose of this note is to cover some topics around the practical implementation of LSTMs in Keras that I could not easily
-find the answers to initially. These notes work together with the notebook ["Learning LSTMs"](notebooks/Learning_LSTMs.ipynb). 
+find the answers to initially. These notes work together with my notebook "Learning LSTMs". 
 
 ## What LSTMs return
 According to the [Keras RNN guide](https://www.tensorflow.org/guide/keras/rnn) "by default, the output of a RNN layer contains
