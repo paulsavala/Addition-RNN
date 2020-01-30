@@ -1,6 +1,7 @@
 from models.seq2seq import SimpleSeq2Seq
 from utils.integers import char_to_int_map, input_seq_length, target_seq_length
 from utils.common import reverse_dict
+from utils.training import format_targets
 from utils.prediction import pprint_metrics
 from data_gen.integer_addition import generate_samples
 
@@ -24,6 +25,7 @@ X_test, y_test = generate_samples(n_samples=Config.test_size, int_encoder=Mappin
 
 
 if __name__ == '__main__':
+    # Define the model
     model_class = SimpleSeq2Seq(encoder_units=1,
                           decoder_units=1,
                           batch_size=64,
@@ -33,9 +35,10 @@ if __name__ == '__main__':
                           )
     model = model_class.model()
 
-    input_target = y_train[:, :-1, :]
-    output_target = y_train[:, 1:, :]
-    model.fit([X_train, input_target], output_target, epochs=Config.epochs, validation_split=Config.validation_split)
+    # Format the input and output
+    input_train_target, output_train_target =  format_targets(y_train)
+    model.fit([X_train, input_train_target], output_train_target, epochs=Config.epochs, validation_split=Config.validation_split)
 
-    test_metrics = model.evaluate([X_test, y_test[:, :-1, :]], y_test[:, 1:, :], verbose=0)
+    input_test_target, output_test_target = format_targets(y_test)
+    test_metrics = model.evaluate([X_test, input_test_target], output_test_target, verbose=0)
     pprint_metrics(test_metrics, model.metrics_names)
