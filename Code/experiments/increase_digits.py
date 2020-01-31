@@ -13,13 +13,12 @@ from datetime import datetime
 
 class Config:
     n_terms = 2
-    n_digits = range(2, 4)
-    train_size = 5 * 10**2
+    n_digits = range(2, 6)
     validation_split = 0.1
-    test_size = 10**2
-    epochs = 3
-    encoder_units = 1
-    batch_size = 1
+    test_size = 10**3
+    epochs = 200
+    encoder_units = 128
+    batch_size = 128
 
 
 class Mappings:
@@ -37,15 +36,16 @@ test_data_y = dict()
 test_data_X_rev = dict()
 test_data_y_rev = dict()
 for d in Config.n_digits:
-    X_train, y_train = generate_samples(n_samples=Config.train_size,
+    n_samples = 5 * 10**(d+1)
+    X_train, y_train = generate_samples(n_samples=n_samples,
                                         n_digits=d,
                                         int_encoder=Mappings.char_to_int,
                                         one_hot=True)
-    X_test, y_test = generate_samples(n_samples=Config.test_size,
+    X_test, y_test = generate_samples(n_samples=n_samples,
                                       n_digits=d,
                                       int_encoder=Mappings.char_to_int,
                                       one_hot=True)
-    X_train_rev, y_train_rev = generate_samples(n_samples=Config.train_size,
+    X_train_rev, y_train_rev = generate_samples(n_samples=Config.test_size,
                                                 n_digits=d,
                                                 int_encoder=Mappings.char_to_int,
                                                 one_hot=True,
@@ -116,6 +116,7 @@ if __name__ == '__main__':
             model.fit([X_train, input_train_target],
                       output_train_target,
                       epochs=Config.epochs,
+                      validation_split=Config.validation_split,
                       callbacks=[cp_callback, metrics_logger])
 
             # Evaluate on the test set
