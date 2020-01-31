@@ -14,7 +14,7 @@ With this setup, one model was trained on the reversed data and one with the nor
 
 ## Goals
 - Scale this to more digits and make sure my results still agree with [here](https://keras.io/examples/addition_rnn/)
-- Refactor code into PyCharm so I can use imports and reuse code
-- See what results are achieved in [here](https://arxiv.org/abs/1904.01557.pdf) and duplicate them
+- ~~Refactor code into PyCharm so I can use imports and reuse code~~
 - Read paper ["What neural networks can reason about"](https://arxiv.org/pdf/1905.13211.pdf) to train and gain a theoretical understanding of the situation
-- Start learning about LSTM variants (attention, etc.)
+- Start learning about LSTM variants (attention, transformer, etc.)
+- Visualize the model using either [this paper](https://arxiv.org/pdf/1506.02078.pdf) or [this tool](https://github.com/HendrikStrobelt/Seq2Seq-Vis)
