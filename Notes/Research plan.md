@@ -18,3 +18,7 @@ With this setup, one model was trained on the reversed data and one with the nor
 - Read paper ["What neural networks can reason about"](https://arxiv.org/pdf/1905.13211.pdf) to train and gain a theoretical understanding of the situation
 - Start learning about LSTM variants (attention, transformer, etc.)
 - Visualize the model using either [this paper](https://arxiv.org/pdf/1506.02078.pdf) or [this tool](https://github.com/HendrikStrobelt/Seq2Seq-Vis)
+
+## Todo
+- Rewrite my models in KMM so that they inherit directly from a Keras Model. That way I don't have to keep writing my_model.model.keras_model_fcn
+- Setup KMM to save model params as well. So inputs to the `__init__` call so that later I can load those params separately to see what I set
