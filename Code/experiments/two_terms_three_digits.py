@@ -1,4 +1,4 @@
-from models.seq2seq import KMMSeq2Seq
+from models.seq2seq import Seq2Seq
 from utils.integers import char_to_int_map, input_seq_length, target_seq_length
 from utils.common import reverse_dict
 from utils.training import format_targets
@@ -15,7 +15,7 @@ class Config:
     validation_split = 0.1
     test_size = 10**2
     epochs = 200
-    reverse = False
+    reverse = True
 
 
 class Mappings:
@@ -39,13 +39,13 @@ X_test, y_test = generate_samples(n_samples=Config.test_size,
 
 if __name__ == '__main__':
     # Define the model
-    model = KMMSeq2Seq(name='basic_addition',
-                       encoder_units=128,
-                       batch_size=128,
-                       input_seq_length=input_seq_length(Config.n_terms, Config.n_digits),
-                       target_seq_length=target_seq_length(Config.n_terms, Config.n_digits),
-                       vocab_size=len(Mappings.char_to_int)
-                       )
+    model = Seq2Seq(name='basic_addition_reversed',
+                    encoder_units=128,
+                    batch_size=128,
+                    input_seq_length=input_seq_length(Config.n_terms, Config.n_digits),
+                    target_seq_length=target_seq_length(Config.n_terms, Config.n_digits),
+                    vocab_size=len(Mappings.char_to_int)
+                    )
     model.build_model()
 
     # Format the input and output
@@ -63,5 +63,7 @@ if __name__ == '__main__':
     test_metrics = model.model.evaluate(x=[X_test, input_test_target], y=output_test_target, verbose=0)
     pprint_metrics(test_metrics, model.model.metrics_names)
 
-    model_notes = 'Initial test of using KMM to run everything.'
+    model_notes = '''Two terms with three digits each. Trained over 200 epochs with 5*10^4 samples (10% validation). 
+    REVERSED.
+    '''
     model.save_model(notes=model_notes)

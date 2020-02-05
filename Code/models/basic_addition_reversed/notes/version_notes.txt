@@ -1,0 +1,5 @@
+===== Version 1 (January 31, 2020 - 23:07:23) =====
+Two terms with three digits each. Trained over 200 epochs with 5*10^4 samples (10% validation). 
+    REVERSED.
+    
+
