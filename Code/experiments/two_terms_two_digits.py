@@ -13,8 +13,11 @@ class Config:
     n_digits = 2
     train_size = 5 * 10**3
     test_size = 10**2
-    epochs = 100
-    reverse = False
+    validation_split = 0.1
+    epochs = 2
+    reverse = True
+    encoder_units = 16
+    batch_size = 128
 
 
 class Mappings:
@@ -38,13 +41,14 @@ X_test, y_test = generate_samples(n_samples=Config.test_size,
 
 if __name__ == '__main__':
     # Define the model
-    model_name = 'basic_addition_2term_2dig'
+    model_name = 'basic_addition'
+    model_name += f'_{Config.n_terms}term_{Config.n_digits}dig'
     if Config.reverse:
         model_name += '_reversed'
 
     model = Seq2Seq(name=model_name,
-                    encoder_units=128,
-                    batch_size=128,
+                    encoder_units=Config.encoder_units,
+                    batch_size=Config.batch_size,
                     input_seq_length=input_seq_length(Config.n_terms, Config.n_digits),
                     target_seq_length=target_seq_length(Config.n_terms, Config.n_digits),
                     vocab_size=len(Mappings.char_to_int),
@@ -59,14 +63,19 @@ if __name__ == '__main__':
                 optimizer=Adam,
                 loss='categorical_crossentropy',
                 metrics=['accuracy'],
-                epochs=Config.epochs)
+                epochs=Config.epochs,
+                validation_split=Config.validation_split)
 
-    # Evaluate on the test set
-    input_test_target, output_test_target = format_targets(y_test)
-    test_metrics = model.model.evaluate(x=[X_test, input_test_target], y=output_test_target, verbose=0)
-    pprint_metrics(test_metrics, model.model.metrics_names)
 
-    model_notes = 'Two terms with two digits each. Trained over 100 epochs with 5*10^3 samples'
+    # # Evaluate on the test set
+    # print('Test set metrics:')
+    # input_test_target, output_test_target = format_targets(y_test)
+    # test_metrics = model.model.evaluate(x=[X_test, input_test_target], y=output_test_target, verbose=0)
+    # pprint_metrics(test_metrics, model.model.metrics_names)
+    #
+    model_notes = f'''
+    {Config.n_terms} terms with {Config.n_digits} digits each. 
+    Trained over {Config.epochs} epochs with {Config.train_size} samples.'''
     if Config.reverse:
         model_notes += ' REVERSED.'
 

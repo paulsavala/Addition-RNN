@@ -9,13 +9,15 @@ from tensorflow.keras.optimizers import Adam
 
 
 class Config:
-    n_terms = 2
-    n_digits = 3
-    train_size = 5 * 10**4
-    validation_split = 0.1
+    n_terms = 3
+    n_digits = 2
+    train_size = 10**4
     test_size = 10**2
-    epochs = 5
-    reverse = False
+    validation_split = 0.1
+    epochs = 200
+    reverse = True
+    encoder_units = 16
+    batch_size = 128
 
 
 class Mappings:
@@ -39,15 +41,17 @@ X_test, y_test = generate_samples(n_samples=Config.test_size,
 
 if __name__ == '__main__':
     # Define the model
-    model_name = 'basic_addition'
+    model_name = 'basic_addition_3term_2dig'
     if Config.reverse:
-        model_name = f'{model_name}_reversed'
+        model_name += '_reversed'
+
     model = Seq2Seq(name=model_name,
-                    encoder_units=128,
-                    batch_size=128,
+                    encoder_units=Config.encoder_units,
+                    batch_size=Config.batch_size,
                     input_seq_length=input_seq_length(Config.n_terms, Config.n_digits),
                     target_seq_length=target_seq_length(Config.n_terms, Config.n_digits),
-                    vocab_size=len(Mappings.char_to_int)
+                    vocab_size=len(Mappings.char_to_int),
+                    int_encoder=Mappings.char_to_int
                     )
     model.build_model()
 
@@ -66,7 +70,7 @@ if __name__ == '__main__':
     test_metrics = model.model.evaluate(x=[X_test, input_test_target], y=output_test_target, verbose=0)
     pprint_metrics(test_metrics, model.model.metrics_names)
 
-    model_notes = 'Two terms with three digits each. Trained over 200 epochs with 5*10^4 samples (10% validation)'
+    model_notes = 'Three terms with two digits each. Trained over 200 epochs with 10^4 samples'
     if Config.reverse:
         model_notes += ' REVERSED.'
 

@@ -6,13 +6,14 @@ from utils.prediction import pprint_metrics
 from data_gen.integer_addition import generate_samples
 
 import numpy as np
+from pathlib import Path
 
 
 class Config:
     n_terms = 2
     n_digits = 2
     test_size = 10**2
-    reverse = False
+    reverse = True
     batch_size = 128
     encoder_units = 16
 
@@ -37,13 +38,14 @@ if __name__ == '__main__':
         model_name += '_reversed'
 
     target_model = Seq2Seq(name=model_name)
-    target_model.load_model(version=1)
+    target_model.load_model(version=1, load_attributes=True)
 
-    # Evaluate it on the test set (sanity check, should be around 80% test accuracy for the "normal" model
-    # and 99% for the reversed model)
+    # Evaluate it on the test set (sanity check)
+    print('Test set metrics:')
     input_test_target, output_test_target = format_targets(y_test)
     test_metrics = target_model.model.evaluate(x=[X_test, input_test_target], y=output_test_target, verbose=0)
     pprint_metrics(test_metrics, target_model.model.metrics_names)
+    print('\n\n')
 
     # # Create a new model that returns states and load weights from the pretrained model
     # # todo: Once I add the ability to save and load model params, then change this to directly load them from the pretrained model
@@ -56,25 +58,26 @@ if __name__ == '__main__':
                          int_encoder=Mappings.char_to_int
                          )
     model.build_model()
-    model.load_weights(target_model)
+    model.load_weights(target_model, load_attributes=True)
 
     # Decode an input repeatedly
-    num_samples = 10
+    num_samples = 100
     input_samples = []
     decoded_samples = []
     for i in range(num_samples):
         X_singleton = X_test[i].reshape(1, *X_test[i].shape)
         y_singleton = y_test[i].reshape(1, *y_test[i].shape)
         X_pred, cell_states = model.decode_sequence(X_singleton, return_cell_states=True)
-        # print(f'Input sequence: {undo_one_hot_matrix(X_singleton, Mappings.int_to_char)}')
-        # print(f'Ground truth: {undo_one_hot_matrix(y_singleton, Mappings.int_to_char)}')
-        # print(f'Prediction: {X_pred}')
-        # print(f'Cell states: {cell_states.shape}')
-        input_samples.append(undo_one_hot_matrix(X_singleton, Mappings.int_to_char))
-        decoded_samples.append((i, cell_states))
+        input_samples.append(undo_one_hot_matrix(X_singleton, Mappings.int_to_char)[0])
+        decoded_samples.append(cell_states)
 
-    np.save('cell_states.npy', np.array(decoded_samples))
-    with open('cell_state_inputs.csv', 'w') as f:
+    decoded_samples = np.array(decoded_samples)
+    print(f'Saving with shape {decoded_samples.shape}')
+    cell_states_dir = f'experiments/cell_states/{Config.n_terms}term_{Config.n_digits}dig'
+    if Config.reverse:
+        cell_states_dir += '_reversed'
+    cell_states_dir = Path(cell_states_dir)
+    np.save(cell_states_dir / Path('cell_states.npy'), decoded_samples)
+    with open(cell_states_dir / Path('input.csv'), 'w') as f:
         for i in range(num_samples):
-            f.write(f'{i}, {input_samples[i]}')
-            f.write('\n')
+            f.write(input_samples[i])

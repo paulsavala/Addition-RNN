@@ -116,7 +116,7 @@ class Seq2Seq(GenericSeq2Seq):
             states_value = [h, c]
 
         if return_cell_states:
-            return decoded_sentence, np.array(cell_states)
+            return decoded_sentence, np.squeeze(np.array(cell_states))
         else:
             return decoded_sentence
 
@@ -160,13 +160,3 @@ class StateSeq2Seq(Seq2Seq):
         decoder_model = Model([decoder_input] + decoder_states_inputs, [decoder_outputs] + decoder_states)
         decoder_model.compile(loss=self.loss, optimizer=self.optimizer, metrics=self.metrics)
         self.decoder_model = decoder_model
-
-    def load_weights(self, target_model=None, weights_file=None):
-        assert target_model is not None or weights_file is not None, 'You must specify either a target model to load weights from or a weights file'
-        assert target_model is None or weights_file is None, 'Specify target_model or weights_file, not both'
-        assert self.model is not None, 'First run build_model()'
-
-        if target_model is not None:
-            self.model.set_weights(target_model.model.get_weights())
-        else:
-            self.model.load_weights(weights_file)
