@@ -58,7 +58,8 @@ if __name__ == '__main__':
     # Decode an input
     X_singleton = X_test[0].reshape(1, *X_test[0].shape)
     y_singleton = y_test[0].reshape(1, *y_test[0].shape)
-    X_pred = model.decode_sequence(X_singleton)
+    X_pred, cell_states = model.decode_sequence(X_singleton, return_cell_states=True)
     print(f'Input sequence: {undo_one_hot_matrix(X_singleton, Mappings.int_to_char)}')
     print(f'Ground truth: {undo_one_hot_matrix(y_singleton, Mappings.int_to_char)}')
     print(f'Prediction: {X_pred}')
+    print(f'Cell states: {cell_states.shape}')

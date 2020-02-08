@@ -75,10 +75,11 @@ class Seq2Seq(GenericSeq2Seq):
         decoder_model.compile(loss=self.loss, optimizer=self.optimizer, metrics=self.metrics)
         self.decoder_model = decoder_model
 
-    def decode_sequence(self, input_seq):
+    def decode_sequence(self, input_seq, return_cell_states=False):
         # Encode the input as state vectors.
         states_value = self.encoder_model.predict(input_seq)
-        # todo: Store the cell states and return them for visualization
+        # cell_states = np.zeros((1, self.decoder_units, self.input_seq_length))
+        cell_states = []
 
         # Generate empty target sequence of length 1.
         target_seq = np.zeros((1, 1, self.vocab_size))
@@ -90,8 +91,8 @@ class Seq2Seq(GenericSeq2Seq):
         stop_condition = False
         decoded_sentence = ''
         while not stop_condition:
-            output_tokens, h, c = self.decoder_model.predict(
-                [target_seq] + states_value)
+            output_tokens, h, c = self.decoder_model.predict([target_seq] + states_value)
+            cell_states.append(c)
 
             # Sample a token
             # todo: What does the -1 do here?
@@ -114,7 +115,10 @@ class Seq2Seq(GenericSeq2Seq):
             # Update states
             states_value = [h, c]
 
-        return decoded_sentence
+        if return_cell_states:
+            return decoded_sentence, np.array(cell_states)
+        else:
+            return decoded_sentence
 
 
 class StateSeq2Seq(Seq2Seq):
