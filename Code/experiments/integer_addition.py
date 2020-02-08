@@ -9,14 +9,14 @@ from tensorflow.keras.optimizers import Adam
 
 
 class Config:
-    n_terms = 3
+    n_terms = 2
     n_digits = 2
-    train_size = 10**4
+    train_size = 5 * 10**3
     test_size = 10**2
-    validation_split = 0.1
+    validation_split = 0
     epochs = 200
-    reverse = True
-    encoder_units = 16
+    reverse = False
+    encoder_units = 32
     batch_size = 128
 
 
@@ -41,7 +41,8 @@ X_test, y_test = generate_samples(n_samples=Config.test_size,
 
 if __name__ == '__main__':
     # Define the model
-    model_name = 'basic_addition_3term_2dig'
+    model_name = 'basic_addition'
+    model_name += f'_{Config.n_terms}term_{Config.n_digits}dig'
     if Config.reverse:
         model_name += '_reversed'
 
@@ -65,12 +66,16 @@ if __name__ == '__main__':
                 epochs=Config.epochs,
                 validation_split=Config.validation_split)
 
+
     # Evaluate on the test set
+    print('Test set metrics:')
     input_test_target, output_test_target = format_targets(y_test)
     test_metrics = model.model.evaluate(x=[X_test, input_test_target], y=output_test_target, verbose=0)
     pprint_metrics(test_metrics, model.model.metrics_names)
 
-    model_notes = 'Three terms with two digits each. Trained over 200 epochs with 10^4 samples'
+    model_notes = f'''
+    {Config.n_terms} terms with {Config.n_digits} digits each. 
+    Trained over {Config.epochs} epochs with {Config.train_size} samples.'''
     if Config.reverse:
         model_notes += ' REVERSED.'
 

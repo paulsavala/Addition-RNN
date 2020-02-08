@@ -33,7 +33,8 @@ X_test, y_test = generate_samples(n_samples=Config.test_size,
 
 if __name__ == '__main__':
     # Load the pretrained model
-    model_name = 'basic_addition_2term_2dig'
+    model_name = 'basic_addition'
+    model_name += f'_{Config.n_terms}term_{Config.n_digits}dig'
     if Config.reverse:
         model_name += '_reversed'
 
@@ -47,8 +48,7 @@ if __name__ == '__main__':
     pprint_metrics(test_metrics, target_model.model.metrics_names)
     print('\n\n')
 
-    # # Create a new model that returns states and load weights from the pretrained model
-    # # todo: Once I add the ability to save and load model params, then change this to directly load them from the pretrained model
+    # Create a new model that returns states and load weights from the pretrained model
     model = StateSeq2Seq(name='basic_addition_viz',
                          encoder_units=Config.encoder_units,
                          batch_size=1,
@@ -77,7 +77,12 @@ if __name__ == '__main__':
     if Config.reverse:
         cell_states_dir += '_reversed'
     cell_states_dir = Path(cell_states_dir)
+    if not cell_states_dir.exists():
+        cell_states_dir.mkdir()
     np.save(cell_states_dir / Path('cell_states.npy'), decoded_samples)
     with open(cell_states_dir / Path('input.csv'), 'w') as f:
         for i in range(num_samples):
             f.write(input_samples[i])
+
+    # No need to keep this model around, it was just for prediction
+    model.delete_model()
