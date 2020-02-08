@@ -1,6 +1,8 @@
 import numpy as np
 
 
+# todo: Rewrite these first three functions. I'm confusing the ideas of X and y with input and target which makes it all
+#       hard to follow
 def example_prediction(model, X, y):
     # Given a compiled model and input and target data, generate a prediction (used for testing)
     X_singleton = X[0].reshape(1, *X[0].shape)
@@ -17,7 +19,7 @@ def sample_from_softmax(output):
     return sampled_output
 
 
-def predict_one(model, X, y):
+def evaluate_one(model, X, y):
     # Given a compiled model and input and target data, compare the predictions with the correct values
     model_output = example_prediction(model, X, y)
     sampled_pred = sample_from_softmax(model_output)

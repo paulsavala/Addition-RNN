@@ -10,11 +10,10 @@ from tensorflow.keras.optimizers import Adam
 
 class Config:
     n_terms = 2
-    n_digits = 3
-    train_size = 5 * 10**4
-    validation_split = 0.1
+    n_digits = 2
+    train_size = 5 * 10**3
     test_size = 10**2
-    epochs = 200
+    epochs = 100
     reverse = False
 
 
@@ -39,10 +38,10 @@ X_test, y_test = generate_samples(n_samples=Config.test_size,
 
 if __name__ == '__main__':
     # Define the model
+    model_name = 'basic_addition_2term_2dig'
     if Config.reverse:
-        model_name = 'basic_addition_reversed'
-    else:
-        model_name = 'basic_addition'
+        model_name += '_reversed'
+
     model = Seq2Seq(name=model_name,
                     encoder_units=128,
                     batch_size=128,
@@ -54,21 +53,20 @@ if __name__ == '__main__':
     model.build_model()
 
     # Format the input and output
-    input_train_target, output_train_target =  format_targets(y_train)
+    input_train_target, output_train_target = format_targets(y_train)
     model.train(X=[X_train, input_train_target],
                 y=output_train_target,
                 optimizer=Adam,
                 loss='categorical_crossentropy',
                 metrics=['accuracy'],
-                epochs=Config.epochs,
-                validation_split=Config.validation_split)
+                epochs=Config.epochs)
 
     # Evaluate on the test set
     input_test_target, output_test_target = format_targets(y_test)
     test_metrics = model.model.evaluate(x=[X_test, input_test_target], y=output_test_target, verbose=0)
     pprint_metrics(test_metrics, model.model.metrics_names)
 
-    model_notes = 'Two terms with three digits each. Trained over 200 epochs with 5*10^4 samples (10% validation)'
+    model_notes = 'Two terms with two digits each. Trained over 100 epochs with 5*10^3 samples'
     if Config.reverse:
         model_notes += ' REVERSED.'
 

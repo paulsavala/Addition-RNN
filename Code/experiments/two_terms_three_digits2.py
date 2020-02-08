@@ -14,7 +14,7 @@ class Config:
     train_size = 5 * 10**4
     validation_split = 0.1
     test_size = 10**2
-    epochs = 200
+    epochs = 5
     reverse = False
 
 
@@ -39,22 +39,20 @@ X_test, y_test = generate_samples(n_samples=Config.test_size,
 
 if __name__ == '__main__':
     # Define the model
+    model_name = 'basic_addition'
     if Config.reverse:
-        model_name = 'basic_addition_reversed'
-    else:
-        model_name = 'basic_addition'
+        model_name = f'{model_name}_reversed'
     model = Seq2Seq(name=model_name,
                     encoder_units=128,
                     batch_size=128,
                     input_seq_length=input_seq_length(Config.n_terms, Config.n_digits),
                     target_seq_length=target_seq_length(Config.n_terms, Config.n_digits),
-                    vocab_size=len(Mappings.char_to_int),
-                    int_encoder=Mappings.char_to_int
+                    vocab_size=len(Mappings.char_to_int)
                     )
     model.build_model()
 
     # Format the input and output
-    input_train_target, output_train_target =  format_targets(y_train)
+    input_train_target, output_train_target = format_targets(y_train)
     model.train(X=[X_train, input_train_target],
                 y=output_train_target,
                 optimizer=Adam,

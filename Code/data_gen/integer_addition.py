@@ -2,7 +2,7 @@ import numpy as np
 from utils.integers import one_hot_matrix, input_seq_length, target_seq_length
 
 
-def _generate_sample(n_terms, n_digits, int_encoder=None, reverse=False):
+def _generate_sample(n_terms, n_digits, int_encoder=None, reverse=False, pad=False):
     # Generate a sample of the form "number_1+number_2+...+number_{n_terms}=answer".
     # Each number_i has n_digits digits
     # If a dictionary is passed for int_encoder then use the it to convert characters to integers (so for instance
@@ -19,15 +19,15 @@ def _generate_sample(n_terms, n_digits, int_encoder=None, reverse=False):
     # Pad x so that is always has the same length. We subtract one because we don't yet account for the \n character
     max_input_digits = input_seq_length(n_terms, n_digits) - 1
     x_str = x_str.rjust(max_input_digits)
-
     max_target_digits = target_seq_length(n_terms, n_digits)
     y_str = y_str.rjust(max_target_digits)
 
     if reverse:
         x_str = x_str[::-1]
 
+    # Prepend an end-of-sequence character \n and for the target append a start-of-sequence character \t
     x_str += '\n'
-    y_str += '\n'
+    y_str = '\t' + y_str + '\n'
 
     x_list = list(x_str)
     y_list = list(y_str)
