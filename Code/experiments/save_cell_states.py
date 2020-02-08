@@ -5,6 +5,8 @@ from utils.training import format_targets
 from utils.prediction import pprint_metrics
 from data_gen.integer_addition import generate_samples
 
+import numpy as np
+
 
 class Config:
     n_terms = 2
@@ -12,6 +14,7 @@ class Config:
     test_size = 10**2
     reverse = False
     batch_size = 128
+    encoder_units = 16
 
 
 class Mappings:
@@ -45,7 +48,7 @@ if __name__ == '__main__':
     # # Create a new model that returns states and load weights from the pretrained model
     # # todo: Once I add the ability to save and load model params, then change this to directly load them from the pretrained model
     model = StateSeq2Seq(name='basic_addition_viz',
-                         encoder_units=128,
+                         encoder_units=Config.encoder_units,
                          batch_size=1,
                          input_seq_length=input_seq_length(Config.n_terms, Config.n_digits),
                          target_seq_length=target_seq_length(Config.n_terms, Config.n_digits),
@@ -55,11 +58,23 @@ if __name__ == '__main__':
     model.build_model()
     model.load_weights(target_model)
 
-    # Decode an input
-    X_singleton = X_test[0].reshape(1, *X_test[0].shape)
-    y_singleton = y_test[0].reshape(1, *y_test[0].shape)
-    X_pred, cell_states = model.decode_sequence(X_singleton, return_cell_states=True)
-    print(f'Input sequence: {undo_one_hot_matrix(X_singleton, Mappings.int_to_char)}')
-    print(f'Ground truth: {undo_one_hot_matrix(y_singleton, Mappings.int_to_char)}')
-    print(f'Prediction: {X_pred}')
-    print(f'Cell states: {cell_states.shape}')
+    # Decode an input repeatedly
+    num_samples = 10
+    input_samples = []
+    decoded_samples = []
+    for i in range(num_samples):
+        X_singleton = X_test[i].reshape(1, *X_test[i].shape)
+        y_singleton = y_test[i].reshape(1, *y_test[i].shape)
+        X_pred, cell_states = model.decode_sequence(X_singleton, return_cell_states=True)
+        # print(f'Input sequence: {undo_one_hot_matrix(X_singleton, Mappings.int_to_char)}')
+        # print(f'Ground truth: {undo_one_hot_matrix(y_singleton, Mappings.int_to_char)}')
+        # print(f'Prediction: {X_pred}')
+        # print(f'Cell states: {cell_states.shape}')
+        input_samples.append(undo_one_hot_matrix(X_singleton, Mappings.int_to_char))
+        decoded_samples.append((i, cell_states))
+
+    np.save('cell_states.npy', np.array(decoded_samples))
+    with open('cell_state_inputs.csv', 'w') as f:
+        for i in range(num_samples):
+            f.write(f'{i}, {input_samples[i]}')
+            f.write('\n')
