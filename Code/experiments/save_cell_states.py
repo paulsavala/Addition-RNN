@@ -1,4 +1,4 @@
-from models.seq2seq import Seq2Seq, StateSeq2Seq
+from models.seq2seq import Seq2Seq
 from utils.integers import char_to_int_map, input_seq_length, target_seq_length, undo_one_hot_matrix
 from utils.common import reverse_dict
 from utils.training import format_targets
@@ -10,25 +10,17 @@ from pathlib import Path
 
 
 class Config:
-    n_terms = 2
+    n_terms = 4
     n_digits = 2
     test_size = 10**2
-    reverse = True
+    reverse = False
     batch_size = 128
-    encoder_units = 16
+    encoder_units = 32
 
 
 class Mappings:
     char_to_int = char_to_int_map()
     int_to_char = reverse_dict(char_to_int)
-
-
-X_test, y_test = generate_samples(n_samples=Config.test_size,
-                                  n_terms=Config.n_terms,
-                                  n_digits=Config.n_digits,
-                                  int_encoder=Mappings.char_to_int,
-                                  one_hot=True,
-                                  reverse=Config.reverse)
 
 
 if __name__ == '__main__':
@@ -41,15 +33,8 @@ if __name__ == '__main__':
     target_model = Seq2Seq(name=model_name)
     target_model.load_model(version=1, load_attributes=True)
 
-    # Evaluate it on the test set (sanity check)
-    print('Test set metrics:')
-    input_test_target, output_test_target = format_targets(y_test)
-    test_metrics = target_model.model.evaluate(x=[X_test, input_test_target], y=output_test_target, verbose=0)
-    pprint_metrics(test_metrics, target_model.model.metrics_names)
-    print('\n\n')
-
-    # Create a new model that returns states and load weights from the pretrained model
-    model = StateSeq2Seq(name='basic_addition_viz',
+    # Hack to work around build_model destroying the loaded weights
+    model = Seq2Seq(name='basic_addition_states',
                          encoder_units=Config.encoder_units,
                          batch_size=1,
                          input_seq_length=input_seq_length(Config.n_terms, Config.n_digits),
@@ -59,6 +44,21 @@ if __name__ == '__main__':
                          )
     model.build_model()
     model.load_weights(target_model, load_attributes=True)
+
+    # Generate some test data to visualize
+    X_test, y_test = generate_samples(n_samples=Config.test_size,
+                                      n_terms=Config.n_terms,
+                                      n_digits=Config.n_digits,
+                                      int_encoder=Mappings.char_to_int,
+                                      one_hot=True,
+                                      reverse=Config.reverse)
+
+    # Evaluate it on the test set (sanity check)
+    print('Test set metrics:')
+    input_test_target, output_test_target = format_targets(y_test)
+    test_metrics = model.model.evaluate(x=[X_test, input_test_target], y=output_test_target, verbose=0)
+    pprint_metrics(test_metrics, model.model.metrics_names)
+    print('\n\n')
 
     # Decode an input repeatedly
     num_samples = 100
@@ -84,5 +84,5 @@ if __name__ == '__main__':
         for i in range(num_samples):
             f.write(input_samples[i])
 
-    # No need to keep this model around, it was just for prediction
+    # We don't need this model anymore, it was just used to save cell states
     model.delete_model()

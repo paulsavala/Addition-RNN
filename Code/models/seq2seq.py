@@ -41,13 +41,14 @@ class Seq2Seq(GenericSeq2Seq):
         if self.target_seq_length is None:
             self.target_seq_length = self.input_seq_length
 
-        encoder_input = Input(shape=(self.input_seq_length, self.vocab_size), batch_size=self.batch_size, name='Encoder_Input')
+        # Training model
+        encoder_input = Input(shape=(None, self.vocab_size), batch_size=self.batch_size, name='Encoder_Input')
         encoder_lstm = LSTM(units=self.encoder_units, return_state=True, name='Encoder_LSTM')
-        encoder_lstm_output = encoder_lstm(encoder_input)
-        encoder_states = encoder_lstm_output[1:]
+        _, encoder_h_state, encoder_c_state = encoder_lstm(encoder_input)
+        encoder_states = [encoder_h_state, encoder_c_state]
 
         decoder_input = Input(shape=(None, self.vocab_size), batch_size=self.batch_size, name='Decoder_Input')
-        decoder_lstm = LSTM(units=self.decoder_units, return_sequences=True, return_state=True, name='Decoder_LSTM')
+        decoder_lstm = LSTM(units=self.decoder_units, return_state=True, return_sequences=True, name='Decoder_LSTM')
         decoder_lstm_output, _, _ = decoder_lstm(decoder_input, initial_state=encoder_states)
         decoder_dense = Dense(self.vocab_size, activation='softmax', name='Decoder_Dense')
         decoder_output = decoder_dense(decoder_lstm_output)
@@ -65,13 +66,10 @@ class Seq2Seq(GenericSeq2Seq):
         decoder_state_input_h = Input(shape=(self.decoder_units,))
         decoder_state_input_c = Input(shape=(self.decoder_units,))
         decoder_states_inputs = [decoder_state_input_h, decoder_state_input_c]
-        decoder_outputs, state_h, state_c = decoder_lstm(
-            decoder_input, initial_state=decoder_states_inputs)
+        decoder_outputs, state_h, state_c = decoder_lstm(decoder_input, initial_state=decoder_states_inputs)
         decoder_states = [state_h, state_c]
         decoder_outputs = decoder_dense(decoder_outputs)
-        decoder_model = Model(
-            [decoder_input] + decoder_states_inputs,
-            [decoder_outputs] + decoder_states)
+        decoder_model = Model([decoder_input] + decoder_states_inputs, [decoder_outputs] + decoder_states)
         decoder_model.compile(loss=self.loss, optimizer=self.optimizer, metrics=self.metrics)
         self.decoder_model = decoder_model
 
@@ -119,44 +117,3 @@ class Seq2Seq(GenericSeq2Seq):
             return decoded_sentence, np.squeeze(np.array(cell_states))
         else:
             return decoded_sentence
-
-
-class StateSeq2Seq(Seq2Seq):
-    def build_model(self):
-        if self.decoder_units is None:
-            self.decoder_units = self.encoder_units
-
-        if self.target_seq_length is None:
-            self.target_seq_length = self.input_seq_length
-
-        # Training model
-        encoder_input = Input(shape=(None, self.vocab_size), batch_size=self.batch_size, name='Encoder_Input')
-        encoder_lstm = LSTM(units=self.encoder_units, return_state=True, name='Encoder_LSTM')
-        _, encoder_h_state, encoder_c_state = encoder_lstm(encoder_input)
-        encoder_states = [encoder_h_state, encoder_c_state]
-
-        decoder_input = Input(shape=(None, self.vocab_size), batch_size=self.batch_size, name='Decoder_Input')
-        decoder_lstm = LSTM(units=self.decoder_units, return_state=True, return_sequences=True, name='Decoder_LSTM')
-        decoder_lstm_output, _, _ = decoder_lstm(decoder_input, initial_state=encoder_states)
-        decoder_dense = Dense(self.vocab_size, activation='softmax', name='Decoder_Dense')
-        decoder_output = decoder_dense(decoder_lstm_output)
-
-        model = Model(inputs=[encoder_input, decoder_input], outputs=[decoder_output, *encoder_states])
-        model.compile(loss=self.loss, optimizer=self.optimizer, metrics=self.metrics)
-        self.model = model
-
-        # Encoder model
-        encoder_model = Model(encoder_input, encoder_states)
-        encoder_model.compile(loss=self.loss, optimizer=self.optimizer, metrics=self.metrics)
-        self.encoder_model = encoder_model
-
-        # Decoder (inference) model
-        decoder_state_input_h = Input(shape=(self.decoder_units,))
-        decoder_state_input_c = Input(shape=(self.decoder_units,))
-        decoder_states_inputs = [decoder_state_input_h, decoder_state_input_c]
-        decoder_outputs, state_h, state_c = decoder_lstm(decoder_input, initial_state=decoder_states_inputs)
-        decoder_states = [state_h, state_c]
-        decoder_outputs = decoder_dense(decoder_outputs)
-        decoder_model = Model([decoder_input] + decoder_states_inputs, [decoder_outputs] + decoder_states)
-        decoder_model.compile(loss=self.loss, optimizer=self.optimizer, metrics=self.metrics)
-        self.decoder_model = decoder_model

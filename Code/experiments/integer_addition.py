@@ -9,13 +9,13 @@ from tensorflow.keras.optimizers import Adam
 
 
 class Config:
-    n_terms = 2
+    n_terms = 4
     n_digits = 2
-    train_size = 5 * 10**3
+    train_size = 5 * 10**4
     test_size = 10**2
     validation_split = 0
     epochs = 200
-    reverse = False
+    reverse = True
     encoder_units = 32
     batch_size = 128
 
@@ -78,5 +78,6 @@ if __name__ == '__main__':
     Trained over {Config.epochs} epochs with {Config.train_size} samples.'''
     if Config.reverse:
         model_notes += ' REVERSED.'
+    model_notes += f'\n\nTest metrics:\n{test_metrics}'
 
     model.save_model(notes=model_notes)

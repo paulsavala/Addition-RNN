@@ -1,0 +1,5 @@
+===== Version 1 (February 08, 2020 - 10:51:44) =====
+
+    2 terms with 2 digits each. 
+    Trained over 200 epochs with 5000 samples.
+

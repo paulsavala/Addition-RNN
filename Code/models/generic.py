@@ -83,33 +83,42 @@ class GenericModel:
             raise
 
         if save_attributes:
-            version_attr_file = self.attr_dir / Path(f'v{self.version}.txt')
-
-            # Find which attributes are actually serializable and only save those
-            all_attrs = vars(self)
-            for a in all_attrs.keys():
-                try:
-                    json.dumps(all_attrs[a])
-                    file_io.append_or_write(version_attr_file, f'{a}:{all_attrs[a]}', newline=True)
-                except:
-                    pass
+            self._save_attributes()
 
         if notes is not None:
-            version_notes_file = self.notes_dir / Path(f'v{self.version}.txt')
-            global_notes_file = self.notes_dir / Path(f'version_notes.txt')
-
-            formatted_notes = f'{"="*5} Version {self.version} ({datetime.now().strftime("%B %d, %Y - %H:%M:%S")}) {"="*5}'
-            formatted_notes += '\n'
-            formatted_notes += notes
-            formatted_notes += '\n\n'
-
-            file_io.append_or_write(version_notes_file, formatted_notes)
-            file_io.append_or_write(global_notes_file, formatted_notes)
+            self._save_notes(notes)
 
         if config is not None:
-            config_file = self.config_dir / Path(f'v{self.version}.txt')
-            config_attrs = vars(config)
-            file_io.append_or_write(config_file, config_attrs)
+            self._save_config(config)
+
+    def _save_config(self, config):
+        config_file = self.config_dir / Path(f'v{self.version}.txt')
+        config_attrs = vars(config)
+        file_io.append_or_write(config_file, config_attrs)
+
+    def _save_notes(self, notes):
+        version_notes_file = self.notes_dir / Path(f'v{self.version}.txt')
+        global_notes_file = self.notes_dir / Path(f'version_notes.txt')
+
+        formatted_notes = f'{"=" * 5} Version {self.version} ({datetime.now().strftime("%B %d, %Y - %H:%M:%S")}) {"=" * 5}'
+        formatted_notes += '\n'
+        formatted_notes += notes
+        formatted_notes += '\n\n'
+
+        file_io.append_or_write(version_notes_file, formatted_notes)
+        file_io.append_or_write(global_notes_file, formatted_notes)
+
+    def _save_attributes(self):
+        version_attr_file = self.attr_dir / Path(f'v{self.version}.txt')
+
+        # Find which attributes are actually serializable and only save those
+        all_attrs = vars(self)
+        for a in all_attrs.keys():
+            try:
+                json.dumps(all_attrs[a])
+                file_io.append_or_write(version_attr_file, f'{a}:{all_attrs[a]}', newline=True)
+            except:
+                pass
 
     def _load_attributes(self, attr_dir=None):
         if attr_dir is None:
@@ -127,7 +136,19 @@ class GenericModel:
                 setattr(self, k, v)
                 row = f.readline()
 
-    def load_model(self, version, load_attributes=False):
+    def get_attributes(self, attr_dir=None):
+        # Find which attributes are actually serializable and only return those
+        all_attrs = vars(self)
+        attrs = dict()
+        for a in all_attrs.keys():
+            try:
+                json.dumps(all_attrs[a])
+                attrs[a] = all_attrs[a]
+            except:
+                pass
+        return attrs
+
+    def load_model(self, version, build=False, load_attributes=False):
         # Used to load a saved model. Note that some complex models cannot easily be saved. In that case it is easier
         # to build the model from scratch and then load the weights separately using the load_weights method
         model_file = self.model_dir / Path(f'v{version}.h5')
@@ -136,6 +157,9 @@ class GenericModel:
 
         if load_attributes:
             self._load_attributes()
+
+        if build:
+            self.build_model()
 
     def load_weights(self, target_model=None, weights_file=None, load_attributes=False):
         # Takes an already built model and loads weights from another (pretrained) model with the same architecture
