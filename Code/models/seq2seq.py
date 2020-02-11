@@ -73,11 +73,11 @@ class Seq2Seq(GenericSeq2Seq):
         decoder_model.compile(loss=self.loss, optimizer=self.optimizer, metrics=self.metrics)
         self.decoder_model = decoder_model
 
-    def decode_sequence(self, input_seq, return_cell_states=False):
+    def decode_sequence(self, input_seq, get_input_cell_states=False):
         # Encode the input as state vectors.
         states_value = self.encoder_model.predict(input_seq)
-        # cell_states = np.zeros((1, self.decoder_units, self.input_seq_length))
-        cell_states = []
+        # todo: Store these as numpy arrays from the start
+        input_cell_states = []
 
         # Generate empty target sequence of length 1.
         target_seq = np.zeros((1, 1, self.vocab_size))
@@ -90,7 +90,6 @@ class Seq2Seq(GenericSeq2Seq):
         decoded_sentence = ''
         while not stop_condition:
             output_tokens, h, c = self.decoder_model.predict([target_seq] + states_value)
-            cell_states.append(c)
 
             # Sample a token
             # todo: What does the -1 do here?
@@ -113,7 +112,26 @@ class Seq2Seq(GenericSeq2Seq):
             # Update states
             states_value = [h, c]
 
-        if return_cell_states:
-            return decoded_sentence, np.squeeze(np.array(cell_states))
+        if get_input_cell_states:
+            # Interate through the input one timestep at a time
+            ts = 0
+            while ts < input_seq.shape[1]:
+                input_seq_ts = input_seq[:, ts, :].reshape(input_seq.shape[0], 1, input_seq.shape[2])
+                _, h, c = self.decoder_model.predict([input_seq_ts] + states_value)
+                input_cell_states.append(np.squeeze(c))
+
+                # Update states
+                states_value = [h, c]
+
+                # Update the timestep
+                ts += 1
+
+            input_cell_states = np.array(input_cell_states)
+            input_cell_states = np.squeeze(input_cell_states)
+            cell_states_to_return = input_cell_states
+
+        # todo: This is an ugly way to handle this, clean it up
+        if get_input_cell_states > 0:
+            return decoded_sentence, cell_states_to_return
         else:
             return decoded_sentence

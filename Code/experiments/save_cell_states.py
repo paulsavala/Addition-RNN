@@ -67,7 +67,7 @@ if __name__ == '__main__':
     for i in range(num_samples):
         X_singleton = X_test[i].reshape(1, *X_test[i].shape)
         y_singleton = y_test[i].reshape(1, *y_test[i].shape)
-        X_pred, cell_states = model.decode_sequence(X_singleton, return_cell_states=True)
+        X_pred, cell_states = model.decode_sequence(X_singleton, get_input_cell_states=True)
         input_samples.append(undo_one_hot_matrix(X_singleton, Mappings.int_to_char)[0])
         decoded_samples.append(cell_states)
 
