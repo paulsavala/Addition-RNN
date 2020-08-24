@@ -101,8 +101,7 @@ class Seq2Seq(GenericSeq2Seq):
             # Exit condition: either hit max length
             # or find stop character.
             # todo: Remove this hardcoded max length
-            if (sampled_char == '\n' or
-                    len(decoded_sentence) > 100):
+            if (sampled_char == '\n' or len(decoded_sentence) > 100):
                 stop_condition = True
 
             # Update the target sequence (of length 1).

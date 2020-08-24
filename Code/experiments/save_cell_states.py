@@ -10,10 +10,10 @@ from pathlib import Path
 
 
 class Config:
-    n_terms = 4
+    n_terms = 2
     n_digits = 2
     test_size = 10**2
-    reverse = False
+    reverse = True
     batch_size = 128
     encoder_units = 32
 
@@ -35,13 +35,13 @@ if __name__ == '__main__':
 
     # Hack to work around build_model destroying the loaded weights
     model = Seq2Seq(name='basic_addition_states',
-                         encoder_units=Config.encoder_units,
-                         batch_size=1,
-                         input_seq_length=input_seq_length(Config.n_terms, Config.n_digits),
-                         target_seq_length=target_seq_length(Config.n_terms, Config.n_digits),
-                         vocab_size=len(Mappings.char_to_int),
-                         int_encoder=Mappings.char_to_int
-                         )
+                    encoder_units=Config.encoder_units,
+                    batch_size=1,
+                    input_seq_length=input_seq_length(Config.n_terms, Config.n_digits),
+                    target_seq_length=target_seq_length(Config.n_terms, Config.n_digits),
+                    vocab_size=len(Mappings.char_to_int),
+                    int_encoder=Mappings.char_to_int
+                    )
     model.build_model()
     model.load_weights(target_model, load_attributes=True)
 

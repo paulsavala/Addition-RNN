@@ -7,8 +7,17 @@ from utils.common import sigmoid
 
 
 class Config:
-    n_terms = 4
+    n_terms = 2
     n_digits = 2
+
+
+def blue_red_bg(cell_value):
+    # Return blue for negative values and red for positive values
+    if cell_value < 0:
+        return (0, 0, 1, sigmoid(cell_value))
+    else:
+        return (1, 0, 0, sigmoid(cell_value))
+
 
 if __name__ == '__main__':
     input_seqs = []
@@ -39,7 +48,7 @@ if __name__ == '__main__':
             cell_data = single_cell_state[:, cell]
             for ts in range(single_cell_state.shape[0]):
                 plt.text(x=ts * width_step + width_step, y=cell * height_step, s=single_sample[ts],
-                         backgroundcolor=(1, 0, 0, sigmoid(cell_data[ts])))
+                         backgroundcolor=blue_red_bg(cell_data[ts]))
 
         cell_state_plots_dir = Path(f'experiments/cell_states/{Config.n_terms}term_{Config.n_digits}dig/plots')
         if not cell_state_plots_dir.exists():

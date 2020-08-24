@@ -9,15 +9,15 @@ from tensorflow.keras.optimizers import Adam
 
 
 class Config:
-    n_terms = 4
+    n_terms = 2
     n_digits = 2
-    train_size = 5 * 10**4
+    train_size = 5 * 10**3
     test_size = 10**2
     validation_split = 0
     epochs = 200
-    reverse = True
-    encoder_units = 32
-    batch_size = 128
+    reverse = False
+    encoder_units = 16
+    batch_size = 64
 
 
 class Mappings:
@@ -66,18 +66,22 @@ if __name__ == '__main__':
                 epochs=Config.epochs,
                 validation_split=Config.validation_split)
 
-
     # Evaluate on the test set
     print('Test set metrics:')
     input_test_target, output_test_target = format_targets(y_test)
     test_metrics = model.model.evaluate(x=[X_test, input_test_target], y=output_test_target, verbose=0)
-    pprint_metrics(test_metrics, model.model.metrics_names)
+    pretty_metrics = pprint_metrics(test_metrics, model.model.metrics_names, return_pprint=True)
 
     model_notes = f'''
-    {Config.n_terms} terms with {Config.n_digits} digits each. 
-    Trained over {Config.epochs} epochs with {Config.train_size} samples.'''
-    if Config.reverse:
-        model_notes += ' REVERSED.'
-    model_notes += f'\n\nTest metrics:\n{test_metrics}'
+        {Config.n_terms} terms with {Config.n_digits} digits each.\n
+        Epochs: {Config.epochs}\n
+        Train size: {Config.train_size}\n
+        Test size: {Config.test_size}\n
+        Validation split: {Config.validation_split}\n
+        Encoder units: {Config.encoder_units}\n
+        Batch size: {Config.batch_size}\n
+        Reversed: {Config.reverse}\n
+        '''
+    model_notes += f'\n\nTest metrics:\n{pretty_metrics}'
 
     model.save_model(notes=model_notes)

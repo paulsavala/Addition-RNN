@@ -29,5 +29,8 @@ def evaluate_one(model, X, y):
     print(f'Pred = {sampled_pred}')
 
 
-def pprint_metrics(metrics, metrics_names):
-    print('\n'.join(f'{n} = {v:.4f}' for n, v in list(zip(metrics_names, metrics))))
+def pprint_metrics(metrics, metrics_names, return_pprint=False):
+    pretty_metrics = '\n'.join(f'{n} = {v:.4f}' for n, v in list(zip(metrics_names, metrics)))
+    print(pretty_metrics)
+    if return_pprint:
+        return pretty_metrics
