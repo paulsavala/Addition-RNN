@@ -1,11 +1,12 @@
 from models.seq2seq import Seq2Seq
-from utils.integers import char_to_int_map, input_seq_length, target_seq_length
+from utils.integers import char_to_int_map, input_seq_length, target_seq_length, undo_one_hot_matrix
 from utils.common import reverse_dict
+from utils.file_io import list_to_csv
 from utils.training import format_targets
 from utils.prediction import pprint_metrics
-from data_gen.integer_addition import generate_samples, generate_all_samples
+from data_gen.integer_addition import generate_all_samples
 
-from tensorflow.keras.optimizers import Adam
+import re
 
 
 class Config:
@@ -13,7 +14,7 @@ class Config:
     n_digits = 2
     test_size = 10**2
     reverse = False
-    encoder_units = 16
+    encoder_units = 64
 
 
 class Mappings:
@@ -24,7 +25,7 @@ class Mappings:
 if __name__ == '__main__':
     # Load the pretrained model
     model_name = 'basic_addition'
-    model_name += f'_{Config.n_terms}term_{Config.n_digits}dig'
+    model_name += f'_{Config.n_terms}term_{Config.n_digits}dig_{Config.encoder_units}units'
     if Config.reverse:
         model_name += '_reversed'
 
@@ -50,8 +51,34 @@ if __name__ == '__main__':
                                           one_hot=True,
                                           reverse=Config.reverse)
 
-    # Evaluate it on the test set (sanity check)
+    # Evaluate it on the test set and decode the predictions
     print('Test set metrics:')
     input_test_target, output_test_target = format_targets(y_test)
-    preds = model.model.predict(x=[X_test, input_test_target], verbose=0)
-    pass
+    test_metrics = model.model.evaluate(x=[X_test, input_test_target], y=output_test_target, verbose=0)
+    pprint_metrics(test_metrics, model.model.metrics_names)
+    print('\n\n')
+
+    decoded_X = undo_one_hot_matrix(X_test, Mappings.int_to_char)
+    decoded_y = undo_one_hot_matrix(y_test, Mappings.int_to_char)
+
+    correct = []
+    incorrect = []
+    for i in range(X_test.shape[0]):
+        if i > 0 and i % 100 == 0:
+            print(f'{i}/{X_test.shape[0]}')
+            print(f'{100*len(correct)/i:.1f}% correct')
+            print('-'*20)
+        X_true = decoded_X[i]
+        y_true = decoded_y[i]
+        pred = model.decode_sequence(X_test[i])
+        y_true_val = int(re.search(r'\d+', y_true).group(0))
+        pred_val = int(re.search(r'\d+', pred).group(0))
+        X_pattern = r'\+'.join([r'\d+' for _ in range(Config.n_terms)])
+        X_true_cleaned = re.search(X_pattern, X_true).group(0)
+        if y_true_val == pred_val:
+            correct.append(f'{X_true_cleaned}, {y_true_val}')
+        else:
+            incorrect.append(f'{X_true_cleaned}, {pred_val}, {y_true_val}')
+    list_to_csv(correct, f'basic_addition_{Config.n_terms}term_{Config.n_digits}dig_{Config.encoder_units}units_correct.csv', headers='X_true, y_true')
+    list_to_csv(incorrect, f'basic_addition_{Config.n_terms}term_{Config.n_digits}dig_{Config.encoder_units}units_incorrect.csv', headers='X_true, y_pred, y_true')
+

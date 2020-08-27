@@ -4,8 +4,11 @@ from tensorflow.keras.layers import Input, Embedding, LSTM, Dense
 from models.generic import GenericModel
 from utils.common import reverse_dict
 from utils.prediction import sample_from_softmax
+from utils.file_io import list_to_csv
+from utils.integers import undo_one_hot_matrix
 
 import numpy as np
+import re
 
 
 class GenericSeq2Seq(GenericModel):
@@ -34,6 +37,7 @@ class GenericSeq2Seq(GenericModel):
 
 
 class Seq2Seq(GenericSeq2Seq):
+    # Follows this: https://github.com/keras-team/keras/blob/master/examples/lstm_seq2seq.py
     def build_model(self):
         if self.decoder_units is None:
             self.decoder_units = self.encoder_units
@@ -74,6 +78,9 @@ class Seq2Seq(GenericSeq2Seq):
         self.decoder_model = decoder_model
 
     def decode_sequence(self, input_seq, get_input_cell_states=False):
+        # Reshape singletons if necessary
+        if len(input_seq.shape) == 2:
+            input_seq = np.expand_dims(input_seq, 0)
         # Encode the input as state vectors.
         states_value = self.encoder_model.predict(input_seq)
         # todo: Store these as numpy arrays from the start
@@ -134,3 +141,28 @@ class Seq2Seq(GenericSeq2Seq):
             return decoded_sentence, cell_states_to_return
         else:
             return decoded_sentence
+
+    def predict_and_save(self, X, y, int_decoder, n_terms):
+        decoded_X = undo_one_hot_matrix(X, int_decoder)
+        decoded_y = undo_one_hot_matrix(y, int_decoder)
+
+        correct = []
+        incorrect = []
+        for i in range(X.shape[0]):
+            if i > 0 and i % 100 == 0:
+                print(f'{i}/{X.shape[0]}')
+                print(f'{100 * len(correct) / i:.1f}% correct')
+                print('-' * 20)
+            X_true = decoded_X[i]
+            y_true = decoded_y[i]
+            pred = self.model.decode_sequence(X[i])
+            y_true_val = int(re.search(r'\d+', y_true).group(0))
+            pred_val = int(re.search(r'\d+', pred).group(0))
+            X_pattern = r'\+'.join([r'\d+' for _ in range(n_terms)])
+            X_true_cleaned = re.search(X_pattern, X_true).group(0)
+            if y_true_val == pred_val:
+                correct.append(f'{X_true_cleaned}, {y_true_val}')
+            else:
+                incorrect.append(f'{X_true_cleaned}, {pred_val}, {y_true_val}')
+        list_to_csv(correct, 'correct_preds.csv', headers='X_true, y_true')
+        list_to_csv(incorrect, 'incorrect_preds.csv', headers='X_true, y_pred, y_true')

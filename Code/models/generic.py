@@ -6,7 +6,7 @@ from utils import file_io
 from datetime import datetime
 import json
 
-from utils.file_io import smart_load
+from utils.file_io import smart_load, list_to_csv
 
 
 class GenericModel:
@@ -36,6 +36,8 @@ class GenericModel:
         if not self.notes_dir.exists(): self.notes_dir.mkdir()
         self.config_dir = self.base_model_dir / Path('config')
         if not self.config_dir.exists(): self.config_dir.mkdir()
+        self.preds_dir = self.base_model_dir / Path('predictions')
+        if not self.preds_dir.exists(): self.preds_dir.mkdir()
 
         self.metrics_names = getattr(self.model, 'metrics_names', None)
 

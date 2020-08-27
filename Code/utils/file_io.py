@@ -12,6 +12,16 @@ def delete_folder(path):
         path.rmdir()
 
 
+def list_to_csv(l, path, headers=None):
+    with open(path, 'w') as f:
+        if headers:
+            f.write(headers)
+            f.write('\n')
+        for x in l:
+            f.write(x)
+            f.write('\n')
+
+
 def append_or_write(path, s, newline=False):
     if path.exists():
         open_mode = 'a'

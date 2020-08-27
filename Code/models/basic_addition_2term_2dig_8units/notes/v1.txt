@@ -1,0 +1,48 @@
+===== Version 2 (August 26, 2020 - 15:46:52) =====
+
+        2 terms with 2 digits each.
+
+        Epochs: 200
+
+        Train size: 5000
+
+        Test size: 100
+
+        Validation split: 0
+
+        Encoder units: 8
+
+        Batch size: 64
+
+        Reversed: False
+
+        
+
+Test metrics:
+loss = 0.4704
+accuracy = 0.8580
+
+===== Version 2 (August 26, 2020 - 19:34:31) =====
+
+        2 terms with 2 digits each.
+
+        Epochs: 200
+
+        Train size: 5000
+
+        Test size: 100
+
+        Validation split: 0
+
+        Encoder units: 8
+
+        Batch size: 64
+
+        Reversed: False
+
+        
+
+Test metrics:
+loss = 0.5224
+accuracy = 0.8280
+

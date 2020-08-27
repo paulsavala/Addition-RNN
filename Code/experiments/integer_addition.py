@@ -16,7 +16,7 @@ class Config:
     validation_split = 0
     epochs = 200
     reverse = False
-    encoder_units = 16
+    encoder_units = 64
     batch_size = 64
 
 
@@ -42,7 +42,7 @@ X_test, y_test = generate_samples(n_samples=Config.test_size,
 if __name__ == '__main__':
     # Define the model
     model_name = 'basic_addition'
-    model_name += f'_{Config.n_terms}term_{Config.n_digits}dig'
+    model_name += f'_{Config.n_terms}term_{Config.n_digits}dig_{Config.encoder_units}units'
     if Config.reverse:
         model_name += '_reversed'
 

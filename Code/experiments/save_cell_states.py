@@ -26,7 +26,7 @@ class Mappings:
 if __name__ == '__main__':
     # Load the pretrained model
     model_name = 'basic_addition'
-    model_name += f'_{Config.n_terms}term_{Config.n_digits}dig'
+    model_name += f'_{Config.n_terms}term_{Config.n_digits}dig_{Config.encoder_units}units'
     if Config.reverse:
         model_name += '_reversed'
 

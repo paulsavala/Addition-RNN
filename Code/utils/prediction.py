@@ -1,8 +1,8 @@
 import numpy as np
 
 
-# todo: Rewrite these first three functions. I'm confusing the ideas of X and y with input and target which makes it all
-#       hard to follow
+# todo: Rewrite these first three functions. I'm confusing the ideas of X and y with input and
+#  target which makes it all hard to follow
 def example_prediction(model, X, y):
     # Given a compiled model and input and target data, generate a prediction (used for testing)
     X_singleton = X[0].reshape(1, *X[0].shape)
@@ -17,6 +17,17 @@ def sample_from_softmax(output):
     squeezed_output = np.squeeze(output)
     sampled_output = np.random.choice(np.arange(len(squeezed_output)), p=squeezed_output)
     return sampled_output
+
+
+def sample_from_lstm_softmax(output):
+    # Given the softmax output from an LSTM with shape (n_samples, n_timesteps, vocab_size),
+    # return a vector of size (n_samples, n_timesteps) which has the vocab sampled
+    decoded_output = np.zeros(shape=(output.shape[0], output.shape[1]))
+    for i, sample in enumerate(output):
+        for t, ts in enumerate(sample):
+            value = sample_from_softmax(ts)
+            decoded_output[i, t] = value
+    return decoded_output
 
 
 def evaluate_one(model, X, y):

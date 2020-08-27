@@ -9,6 +9,7 @@ from utils.common import sigmoid
 class Config:
     n_terms = 2
     n_digits = 2
+    encoder_units = 16
 
 
 def blue_red_bg(cell_value):
@@ -21,7 +22,7 @@ def blue_red_bg(cell_value):
 
 if __name__ == '__main__':
     input_seqs = []
-    cell_state_dir = Path(f'experiments/cell_states/{Config.n_terms}term_{Config.n_digits}dig')
+    cell_state_dir = Path(f'experiments/cell_states/{Config.n_terms}term_{Config.n_digits}dig_{Config.encoder_units}units')
 
     with open(cell_state_dir / Path('input.csv')) as f:
         csv_reader = csv.reader(f)
