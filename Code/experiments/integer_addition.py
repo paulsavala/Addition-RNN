@@ -16,7 +16,7 @@ class Config:
     validation_split = 0
     epochs = 200
     reverse = False
-    encoder_units = 64
+    encoder_units = 32
     batch_size = 64
 
 

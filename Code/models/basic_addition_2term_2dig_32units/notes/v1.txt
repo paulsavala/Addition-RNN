@@ -22,3 +22,27 @@ Test metrics:
 loss = 0.4194
 accuracy = 0.8020
 
+===== Version 1 (August 27, 2020 - 10:21:07) =====
+
+        2 terms with 2 digits each.
+
+        Epochs: 200
+
+        Train size: 5000
+
+        Test size: 100
+
+        Validation split: 0
+
+        Encoder units: 32
+
+        Batch size: 64
+
+        Reversed: False
+
+        
+
+Test metrics:
+loss = 0.2370
+accuracy = 0.9260
+

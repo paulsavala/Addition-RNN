@@ -14,7 +14,7 @@ class Config:
     n_digits = 2
     test_size = 10**2
     reverse = False
-    encoder_units = 64
+    encoder_units = 2
 
 
 class Mappings:
