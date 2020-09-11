@@ -1,0 +1,14 @@
+name:basic_addition_2term_2dig_32units_generalize3
+version:1
+metrics_names:None
+encoder_units:32
+decoder_units:32
+batch_size:64
+vocab_size:14
+input_seq_length:9
+target_seq_length:4
+loss:categorical_crossentropy
+optimizer:adam
+metrics:['accuracy']
+int_encoder:{'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '+': 10, '\t': 11, '\n': 12, ' ': 13}
+int_decoder:{0: '0', 1: '1', 2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9', 10: '+', 11: '\t', 12: '\n', 13: ' '}

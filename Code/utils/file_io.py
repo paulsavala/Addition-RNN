@@ -1,5 +1,6 @@
 import json
 import ast
+from pathlib import Path
 
 
 def delete_folder(path):
@@ -13,8 +14,16 @@ def delete_folder(path):
 
 
 def list_to_csv(l, path, headers=None):
-    with open(path, 'w') as f:
-        if headers:
+    if isinstance(path, str):
+        path = Path(path)
+    if path.exists():
+        open_mode = 'a'
+        write_headers = False
+    else:
+        open_mode = 'w'
+        write_headers = True
+    with open(path, open_mode) as f:
+        if headers and write_headers:
             f.write(headers)
             f.write('\n')
         for x in l:
@@ -23,6 +32,8 @@ def list_to_csv(l, path, headers=None):
 
 
 def append_or_write(path, s, newline=False):
+    if isinstance(path, str):
+        path = Path(path)
     if path.exists():
         open_mode = 'a'
     else:
