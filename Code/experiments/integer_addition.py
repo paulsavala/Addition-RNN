@@ -19,7 +19,7 @@ class Config:
     encoder_units = 32
     batch_size = 64
     allow_less_terms = False
-    uniform_samples = True
+    uniform_samples = False
     generalize_to_n_terms = False
 
 

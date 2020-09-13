@@ -88,8 +88,6 @@ def generate_samples(n_samples, n_terms=2, n_digits=2, int_encoder=None, one_hot
         X, y = _generate_samples(n_samples, n_terms, n_digits, int_encoder, one_hot, reverse, allow_less_terms)
     return X, y
 
-# Generate n_samples examples of addition problems as defined in _generate_sample above
-
 
 def _generate_samples(n_samples, n_terms=2, n_digits=2, int_encoder=None, one_hot=False, reverse=False, allow_less_terms=False):
     # Generate n_samples examples of addition problems as defined in _generate_sample above
@@ -112,6 +110,7 @@ def _generate_samples(n_samples, n_terms=2, n_digits=2, int_encoder=None, one_ho
 
 
 def _generate_uniform_samples(n_samples, n_terms=2, n_digits=2, int_encoder=None, one_hot=False, reverse=False):
+    # Generate samples uniformly w.r.t. the sum
     max_sum = (10**n_digits - 1) * n_terms
     possible_sums = range(max_sum + 1)
 
