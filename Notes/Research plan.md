@@ -54,3 +54,7 @@ With this setup, one model was trained on the reversed data and one with the nor
 ## Todo
 - Rewrite my models in KMM so that they inherit directly from a Keras Model. That way I don't have to keep writing my_model.model.keras_model_fcn
 - ~~Setup KMM to save model params as well. So inputs to the `__init__` call so that later I can load those params separately to see what I set~~ (Done Feb 2020)
+
+## Other papers
+- [Survey of automatic math word problem solving](https://arxiv.org/abs/1808.07290)
+- [Application of BERT to math word problems](https://arxiv.org/pdf/1909.00109.pdf)
