@@ -4,6 +4,7 @@ from utils.common import reverse_dict
 from utils.file_io import list_to_csv
 from utils.training import format_targets
 from utils.prediction import pprint_metrics
+from utils.data import Data
 from data_gen.integer_addition import generate_all_samples, generate_samples
 
 import re
@@ -22,6 +23,7 @@ class Config:
     allow_less_terms = False
     uniform_samples = True
     generalize_to_n_terms = False
+    saved_data = Data.random
 
 
 class Mappings:
@@ -59,7 +61,7 @@ if __name__ == '__main__':
     model.build_model()
     model.load_weights(target_model, load_attributes=True)
 
-    if Config.generalize_to_n_terms:
+    if getattr(Config, 'generalize_to_n_terms'):
         # Generate some test data to visualize
         X_test, y_test = generate_samples(n_samples=Config.test_size,
                                           n_terms=Config.generalize_to_n_terms,

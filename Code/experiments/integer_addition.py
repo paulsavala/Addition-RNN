@@ -1,6 +1,7 @@
 from models.seq2seq import Seq2Seq
 from utils.integers import char_to_int_map, input_seq_length, target_seq_length
 from utils.common import reverse_dict
+from utils.data import Data
 from utils.training import format_targets
 from utils.prediction import pprint_metrics
 from data_gen.integer_addition import generate_samples
@@ -14,13 +15,14 @@ class Config:
     train_size = 5 * 10**3
     test_size = 10**3
     validation_split = 0
-    epochs = 200
+    epochs = 100
     reverse = False
     encoder_units = 32
     batch_size = 64
     allow_less_terms = False
     uniform_samples = False
     generalize_to_n_terms = False
+    saved_data = Data.uniform_sum
 
 
 class Mappings:
@@ -28,22 +30,26 @@ class Mappings:
     int_to_char = reverse_dict(char_to_int)
 
 
-X_train, y_train = generate_samples(n_samples=Config.train_size,
-                                    n_terms=Config.n_terms,
-                                    n_digits=Config.n_digits,
-                                    int_encoder=Mappings.char_to_int,
-                                    one_hot=True,
-                                    reverse=Config.reverse,
-                                    allow_less_terms=Config.allow_less_terms,
-                                    uniform=Config.uniform_samples)
-X_test, y_test = generate_samples(n_samples=Config.test_size,
-                                  n_terms=Config.n_terms,
-                                  n_digits=Config.n_digits,
-                                  int_encoder=Mappings.char_to_int,
-                                  one_hot=True,
-                                  reverse=Config.reverse,
-                                  allow_less_terms=Config.allow_less_terms,
-                                  uniform=Config.uniform_samples)
+if getattr(Config, 'saved_data'):
+    # Load the saved data
+    X_train, X_test, y_train, y_test = Data.load(Config.saved_data, Config.n_terms, Config.n_digits)
+else:
+    X_train, y_train = generate_samples(n_samples=Config.train_size,
+                                        n_terms=Config.n_terms,
+                                        n_digits=Config.n_digits,
+                                        int_encoder=Mappings.char_to_int,
+                                        one_hot=True,
+                                        reverse=Config.reverse,
+                                        allow_less_terms=Config.allow_less_terms,
+                                        uniform=Config.uniform_samples)
+    X_test, y_test = generate_samples(n_samples=Config.test_size,
+                                      n_terms=Config.n_terms,
+                                      n_digits=Config.n_digits,
+                                      int_encoder=Mappings.char_to_int,
+                                      one_hot=True,
+                                      reverse=Config.reverse,
+                                      allow_less_terms=Config.allow_less_terms,
+                                      uniform=Config.uniform_samples)
 
 if getattr(Config, 'generalize_to_n_terms', 0) > Config.n_terms:
     X_generalized_test, y_generalized_test = generate_samples(n_samples=Config.test_size,
@@ -67,6 +73,8 @@ if __name__ == '__main__':
         model_name += '_uniform_samples'
     if getattr(Config, 'reverse', False):
         model_name += '_reversed'
+    if getattr(Config, 'saved_data', False):
+        model_name += f'_{Config.saved_data.parts[-1]}'
 
     n_terms = max(getattr(Config, 'generalize_to_n_terms', 0), Config.n_terms)
 
