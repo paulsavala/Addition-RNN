@@ -58,3 +58,4 @@ With this setup, one model was trained on the reversed data and one with the nor
 ## Other papers
 - [Survey of automatic math word problem solving](https://arxiv.org/abs/1808.07290)
 - [Application of BERT to math word problems](https://arxiv.org/pdf/1909.00109.pdf)
+- [Overview of curriculum learning approaches](https://arxiv.org/pdf/1904.03626.pdf)
