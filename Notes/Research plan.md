@@ -2,7 +2,15 @@
 The point of this notebook is to give myself a roadmap for where to go. I will also include notes here on what I am currently working on. However, as these ideas get more developed they should get their own notes in this folder.
 
 ## Current progress
-*Nov 24, 2020* - I implemented curriculum learning by having it go through one-digit sums (sums of form `0+0+x`, `0+x+0` and `x+0+0`), then two-digit sums, then three-digit sums. I also implemented the ability to reverse the output (`y`) when predicting, so that it predicts the ones place first, then the tens, etc. I am still running analysis with these and will post results once they're done. From my initial analysis it looks like it drastically improved the situation with the attention mechanism not doing anything useful.
+*Nov 24, 2020* - I implemented curriculum learning by having it go through one-digit sums (sums of form `0+0+x`, `0+x+0` and `x+0+0`), then two-digit sums, then three-digit sums. I also implemented the ability to reverse the output (`y`) when predicting, so that it predicts the ones place first, then the tens, etc. I am still running analysis with these and will post results once they're done. From my initial analysis it looks like it drastically improved the situation with the attention mechanism not doing anything useful. I also fixed training with a reversed `y` (it was stopping as soon as it predicted a newline character, which was the first thing it was _supposed to_ predict!). It's training now.
+
+Going forward, here are some notes/tasks:
+1. I'm starting to think again about the publication side of this. I need to have concrete results to demonstrate the effectiveness. That means I need to outline some concrete goals for myself, and then write code to evaluate any model on train against these goals. That way I can directly see if I'm closer to accomplishing those or not (which I'm not currently doing). Some goals could include:
+ - Overall accuracy
+ - Avg difference between predicted and correct (as integers)
+ - Results on repeated sums (`1+1+1`, `2+2+2`, etc.)
+ - Results on commuted sums
+ - Results on subsums. For example, if it correctly computes `10+20+0` and `0+20+5`, can it also compute `10+20+5`?
 
 *Nov 2, 2020* - I've tried a number of things since last time. The major one is that I changed the encoder-decode model to use attention, and also to use a bidirectional GRU on the encoder side. I did bidirectional since addition is commutative. When looking at the results, we can see some basic attention mechanism usage going on for 2 term 2 digits sums. It's not perfect, but you can sort of tease out what's going on. However, when looking at 3 terms 2 digits, that's all gone. The attention mechanism basically just looks at the "end of sequence" character "\n". Why is this happening? Here are some thoughts:
 1. It's using the hidden states in the encoder instead of attention. Since there are a small number of examples, it's just able to memorize. We can also see that the accuracy drops greatly for 3 terms 2 digits, so that may also reflect what's going on.
